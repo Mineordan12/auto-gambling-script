@@ -1,32 +1,85 @@
 @echo off
-setlocal enabledelayedexpansion
-title GACS2 one-time installer
-set "HERE=%~dp0"
-set "PY=%HERE%portable-python\python.exe"
-set "VENV=%HERE%venv"
-
-echo --- 1. Downloading portable Python 3.11 (18 MB) ---
-powershell -NoP -C "& {
-  $url='https://github.com/indygreg/python-build-standalone/releases/download/20231002/cpython-3.11.5+20231002-x86_64-pc-windows-msvc-shared-install_only.tar.gz';
-  $tmp=(Join-Path $env:TEMP 'py.tar.gz');
-  Invoke-WebRequest -Uri $url -OutFile $tmp;
-  tar -xf $tmp -C '%HERE%' --strip-components=1;
-  Rename-Item '%HERE%\python' 'portable-python'
-}"
-
-echo --- 2. Creating venv ---
-"%PY%" -m venv "%VENV%"
-
-echo --- 3. Installing packages ---
-"%VENV%\Scripts\python.exe" -m pip install -U pip wheel
-"%VENV%\Scripts\python.exe" -m pip install keyboard pyautogui pillow pytesseract opencv-python
-
-echo --- 4. Creating desktop shortcut ---
-set "DESK=%USERPROFILE%\Desktop\GACS2.lnk"
-powershell -NoP -C "$WshShell=New-Object -ComObject WScript.Shell; $lnk=$WshShell.CreateShortcut('%DESK%'); $lnk.TargetPath='%VENV%\Scripts\pythonw.exe'; $lnk.Arguments='\"%HERE%GACS2.py\"'; $lnk.WorkingDirectory='%HERE%'; $lnk.WindowStyle=0; $lnk.Save()"
-
+setlocal EnableDelayedExpansion
+title GACS Setup
+echo ==========================================
+echo GACS Automated Setup
+echo ==========================================
 echo.
-echo === DONE ===
-echo Double-click the new "GACS2" desktop icon to run the bot.
-echo (First time: tab into GTA, then press = to start, - to stop)
+
+:: Check for Python
+echo [1/4] Checking Python installation...
+python --version >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: Python not found in PATH!
+    echo Please install Python from https://python.org
+    echo Make sure to check "Add Python to PATH" during install.
+    pause
+    exit /b 1
+)
+echo Python found.
+echo.
+
+:: Install Python libraries
+echo [2/4] Installing Python libraries...
+python -m pip install keyboard pyautogui pytesseract Pillow
+if errorlevel 1 (
+    echo ERROR: Failed to install Python libraries.
+    pause
+    exit /b 1
+)
+echo Python libraries installed.
+echo.
+
+:: Download Tesseract
+echo [3/4] Downloading Tesseract OCR...
+set "TESS_URL=https://github.com/UB-Mannheim/tesseract/releases/download/v5.4.0.20240606/tesseract-ocr-w64-setup-5.4.0.20240606.exe"
+set "TESS_INSTALLER=%TEMP%\tesseract-setup.exe"
+
+echo Downloading from GitHub...
+powershell -Command "Invoke-WebRequest -Uri '%TESS_URL%' -OutFile '%TESS_INSTALLER%'" 2>nul
+if not exist "%TESS_INSTALLER%" (
+    echo Retry with curl...
+    curl -L -o "%TESS_INSTALLER%" "%TESS_URL%" 2>nul
+)
+if not exist "%TESS_INSTALLER%" (
+    echo ERROR: Download failed. Please download manually from:
+    echo https://github.com/UB-Mannheim/tesseract/releases
+    pause
+    exit /b 1
+)
+echo Download complete.
+echo.
+
+:: Install Tesseract
+echo [4/4] Installing Tesseract OCR...
+echo This may take a minute...
+start /wait "" "%TESS_INSTALLER%" /S
+if errorlevel 1 (
+    echo WARNING: Silent install may have failed, trying normal install...
+    start /wait "" "%TESS_INSTALLER%"
+)
+
+:: Cleanup
+del "%TESS_INSTALLER%" 2>nul
+
+:: Verify installation
+if exist "C:\Program Files\Tesseract-OCR\tesseract.exe" (
+    echo.
+    echo ==========================================
+    echo SUCCESS! Setup complete.
+    echo ==========================================
+    echo.
+    echo Tesseract installed to: C:\Program Files\Tesseract-OCR\
+    echo Python libraries installed.
+    echo.
+    echo You can now run GACS.py
+    echo.
+) else (
+    echo.
+    echo WARNING: Could not verify Tesseract installation.
+    echo Please check if it was installed successfully.
+    echo Expected location: C:\Program Files\Tesseract-OCR\tesseract.exe
+    echo.
+)
+
 pause
