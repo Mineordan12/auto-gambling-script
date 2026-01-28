@@ -1,4 +1,32 @@
-1. Extract this ZIP anywhere (Desktop, Downloads…).  
-2. Double-click “Install-GACS2.bat” once – it downloads Python, installs libs, creates a desktop icon.  
-3. Start GTA, go in-game, then double-click the new “GACS2” desktop icon.  
-4. Press  =  to start the bot,  –  to stop it.  
+# GACS - GTA Auto Casino System
+
+Automated roulette betting for GTA V Online.
+
+## Install (One Time)
+
+1. Install **Python** from https://python.org  
+   ☑ Check "Add Python to PATH" during install
+
+2. Double-click **`setup.bat`**  
+   (This downloads Tesseract and installs Python libraries)
+
+## Run
+
+1. Open GTA V, go to Casino Roulette table
+2. Double-click **`GACS.py`**
+3. Focus GTA game window
+4. Wait for betting round
+5. Press **=** to start
+6. Press **-** to stop instantly
+
+## What It Does
+
+- Loses first round intentionally ($100)
+- Wins next 4 rounds (profit $330000k per round)
+- Repeats forever
+
+## Troubleshooting
+
+- **"Tesseract not found"** → Run `setup.bat` again
+- **Clicks wrong spot** → Make sure GTA is in **Borderless Windowed** mode
+- **Not detecting text** → Make sure betting menu is visible when you start
