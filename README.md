@@ -5,7 +5,7 @@ Automated roulette betting for GTA V Online.
 ## Install (One Time)
 
 1. Install **Python** from https://python.org  
-   ☑ Check "Add Python to PATH" during install
+   Check "Add Python to PATH" during install
 
 2. Double-click **`setup.bat`**  
    (This downloads Tesseract and installs Python libraries)
